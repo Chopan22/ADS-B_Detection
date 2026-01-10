@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "FuzzyVariable.hpp"
@@ -13,11 +12,11 @@ inline FuzzyVariable createSpeedChangeVariable() {
     var.max = 10.0;
 
     var.mfs = {
-        {"Negative_Large", MFType::TRIANGLE, {-10.0, -6.0, -3.0}},
-        {"Negative",       MFType::TRIANGLE, { -6.0, -3.0,  0.0}},
-        {"Zero",           MFType::TRIANGLE, { -1.0,  0.0,  1.0}},
-        {"Positive",       MFType::TRIANGLE, {  0.0,  3.0,  6.0}},
-        {"Positive_Large", MFType::TRIANGLE, {  3.0,  6.0, 10.0}}
+        {"Negative_Large", MFType::Z_SHAPE, {-6.0, -3.0}},
+        {"Negative",       MFType::TRIANGLE, {-6.0, -3.0, 0.0}},
+        {"Zero",           MFType::TRIANGLE, {-1.0,  0.0, 1.0}},
+        {"Positive",       MFType::TRIANGLE, { 0.0,  3.0, 6.0}},
+        {"Positive_Large", MFType::S_SHAPE, { 3.0,  6.0}}
     };
 
     return var;
@@ -30,11 +29,11 @@ inline FuzzyVariable createHeadingChangeVariable() {
     var.max = 180.0;
 
     var.mfs = {
-        {"Negative_Large", MFType::TRIANGLE, {-180.0, -90.0, -30.0}},
-        {"Negative",       MFType::TRIANGLE, { -60.0, -20.0,   0.0}},
-        {"Zero",           MFType::TRIANGLE, {  -5.0,   0.0,   5.0}},
-        {"Positive",       MFType::TRIANGLE, {   0.0,  20.0,  60.0}},
-        {"Positive_Large", MFType::TRIANGLE, {  30.0,  90.0, 180.0}}
+        {"Negative_Large", MFType::Z_SHAPE, {-90.0, -30.0}},
+        {"Negative",       MFType::TRIANGLE, {-60.0, -20.0, 0.0}},
+        {"Zero",           MFType::TRIANGLE, { -5.0,   0.0, 5.0}},
+        {"Positive",       MFType::TRIANGLE, {  0.0,  20.0, 60.0}},
+        {"Positive_Large", MFType::S_SHAPE, { 30.0,  90.0}}
     };
 
     return var;
@@ -47,11 +46,11 @@ inline FuzzyVariable createVerticalRateChangeVariable() {
     var.max = 20.0;
 
     var.mfs = {
-        {"Negative_Large", MFType::TRIANGLE, {-20.0, -10.0, -5.0}},
-        {"Negative",       MFType::TRIANGLE, {-10.0,  -5.0,  0.0}},
-        {"Zero",           MFType::TRIANGLE, { -1.0,   0.0,  1.0}},
-        {"Positive",       MFType::TRIANGLE, {  0.0,   5.0, 10.0}},
-        {"Positive_Large", MFType::TRIANGLE, {  5.0,  10.0, 20.0}}
+        {"Negative_Large", MFType::Z_SHAPE, {-10.0, -5.0}},
+        {"Negative",       MFType::TRIANGLE, {-10.0, -5.0, 0.0}},
+        {"Zero",           MFType::TRIANGLE, { -1.0,  0.0, 1.0}},
+        {"Positive",       MFType::TRIANGLE, {  0.0,  5.0, 10.0}},
+        {"Positive_Large", MFType::S_SHAPE, {  5.0, 10.0}}
     };
 
     return var;
@@ -64,11 +63,11 @@ inline FuzzyVariable createAltitudeChangeVariable() {
     var.max = 1000.0;
 
     var.mfs = {
-        {"Negative_Large", MFType::TRIANGLE, {-1000.0, -500.0, -100.0}},
-        {"Negative",       MFType::TRIANGLE, { -500.0, -100.0,    0.0}},
-        {"Zero",           MFType::TRIANGLE, {  -50.0,    0.0,   50.0}},
-        {"Positive",       MFType::TRIANGLE, {    0.0,  100.0,  500.0}},
-        {"Positive_Large", MFType::TRIANGLE, {  100.0,  500.0, 1000.0}}
+        {"Negative_Large", MFType::Z_SHAPE, {-500.0, -100.0}},
+        {"Negative",       MFType::TRIANGLE, {-500.0, -100.0, 0.0}},
+        {"Zero",           MFType::TRIANGLE, { -50.0,   0.0, 50.0}},
+        {"Positive",       MFType::TRIANGLE, {   0.0, 100.0, 500.0}},
+        {"Positive_Large", MFType::S_SHAPE, { 100.0, 500.0}}
     };
 
     return var;
@@ -81,9 +80,9 @@ inline FuzzyVariable createTimeGapVariable() {
     var.max = 60.0;
 
     var.mfs = {
-        {"Small",  MFType::TRIANGLE, { 0.0,  1.0,  5.0}},
+        {"Small",  MFType::Z_SHAPE, { 1.0,  5.0}},
         {"Medium", MFType::TRIANGLE, { 3.0, 10.0, 20.0}},
-        {"Large",  MFType::TRIANGLE, {15.0, 30.0, 60.0}}
+        {"Large",  MFType::S_SHAPE, {15.0, 30.0}}
     };
 
     return var;
@@ -96,9 +95,9 @@ inline FuzzyVariable createAnomalyLevelVariable() {
     var.max = 1.0;
 
     var.mfs = {
-        {"Low",    MFType::TRIANGLE, {0.0, 0.0, 0.4}},
+        {"Low",    MFType::Z_SHAPE, {0.2, 0.4}},
         {"Medium", MFType::TRIANGLE, {0.2, 0.5, 0.8}},
-        {"High",   MFType::TRIANGLE, {0.6, 1.0, 1.0}}
+        {"High",   MFType::S_SHAPE, {0.6, 0.8}}
     };
 
     return var;

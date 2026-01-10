@@ -30,7 +30,7 @@ public:
             fv.d_speed = curr.velocity - prev.velocity;
             fv.d_heading = headingDelta(prev.heading, curr.heading);
             fv.d_vert_rate = curr.vert_rate - prev.vert_rate;
-            fv.d_altitude = curr.geo_altitude - prev.geo_altitude;
+            fv.d_altitude = curr.baro_altitude - prev.baro_altitude;
             fv.ground_distance = haversine(
                 prev.lat, prev.lon,
                 curr.lat, curr.lon
