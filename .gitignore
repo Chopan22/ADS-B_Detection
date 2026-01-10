@@ -40,5 +40,8 @@
 # debug information files
 *.dwo
 
-data/
+data/*
+!data/
+!data/README.md
+
 build/
