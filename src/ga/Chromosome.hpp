@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <random>
 
+namespace ga {
+
 struct GeneBounds {
     double min;
     double max;
@@ -32,6 +34,7 @@ public:
 
     static const std::vector<double> DEFAULT_GENES;
 };
+}
 
 #ifdef GA_TEST_MODE
 static constexpr size_t TOTAL_GENES = 6;

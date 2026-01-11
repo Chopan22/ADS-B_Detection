@@ -5,6 +5,8 @@
 #include <random>
 #include <cassert>
 
+namespace ga {
+
 constexpr size_t SPEEDCHANGE_GENES = 13;
 constexpr size_t HEADING_GENES     = 13;
 constexpr size_t VERRATE_GENES     = 13;
@@ -65,8 +67,6 @@ const std::vector<double> Chromosome::DEFAULT_GENES = {
 };
 #endif
 
-namespace ga {
-
 Chromosome::Chromosome() {
 #ifdef GA_TEST_MODE
     if (DEFAULT_GENES.size() != 6)
@@ -83,6 +83,12 @@ Chromosome::Chromosome() {
 }
 
 void Chromosome::updateBounds() {
+#ifdef GA_TEST_MODE
+    for (size_t i = 0; i < genes.size(); ++i) {
+        bounds[i].min = 0.0;
+        bounds[i].max = 10.0;
+    }
+#else
     auto getVarIndexAndOffset = [&](size_t i, size_t &offset) -> size_t {
         size_t start = 0;
         size_t var_idx = 0;
@@ -137,6 +143,7 @@ void Chromosome::updateBounds() {
             bounds[i].max = genes[i+2];
         }
     }
+#endif
 }
 
 void Chromosome::repair() {
@@ -173,6 +180,14 @@ std::pair<Chromosome, Chromosome> Chromosome::crossoverTwo(const Chromosome& oth
     Chromosome child1 = *this;
     Chromosome child2 = other;
 
+#ifdef GA_TEST_MODE
+    std::uniform_int_distribution<size_t> dist(1, genes.size() - 1);
+    size_t crossPoint = dist(rng);
+    
+    for (size_t i = crossPoint; i < genes.size(); ++i) {
+        std::swap(child1.genes[i], child2.genes[i]);
+    }
+#else
     constexpr size_t varSizes[] = {
         SPEEDCHANGE_GENES, HEADING_GENES, VERRATE_GENES,
         ALTITUDE_GENES, TIMEGAP_GENES, ANOMALY_GENES
@@ -193,6 +208,7 @@ std::pair<Chromosome, Chromosome> Chromosome::crossoverTwo(const Chromosome& oth
 
         startIdx += varSize;
     }
+#endif
 
     child1.updateBounds();
     child2.updateBounds();

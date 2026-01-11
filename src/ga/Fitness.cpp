@@ -1,8 +1,13 @@
 #include "Fitness.hpp"
-#include "../fuzzy/AdsbFuzzyVariable.hpp"
-#include "../fuzzy/RuleBase.hpp"
+#include "../fuzzy/FuzzyInferenceSystem.hpp"
 #include <stdexcept>
 #include <cmath>
+
+// Only include fuzzy headers in production mode
+#ifndef GA_TEST_MODE
+#include "../fuzzy/AdsbFuzzyVariable.hpp"
+#include "../fuzzy/RuleBase.hpp"
+#endif
 
 namespace ga {
 
@@ -13,13 +18,41 @@ Fitness::Fitness(const std::vector<std::map<std::string, double>>& inputs,
     if (inputs.size() != expectedOutputs.size())
         throw std::runtime_error("Inputs and expected outputs size mismatch");
 }
+
 #ifdef GA_TEST_MODE
 
 double Fitness::evaluate(const Chromosome& c) {
-    double sum = 0.0;
-    for (double g : c.genes)
-        sum += g;
-    return sum;
+    const size_t numTestCases = 10;
+    double totalError = 0.0;
+    
+    for (size_t i = 0; i < numTestCases; ++i) {
+        double simulatedInput = static_cast<double>(i) / numTestCases;
+        
+        double fuzzyOutput = 0.0;
+        double totalWeight = 0.0;
+        
+        for (size_t g = 0; g < c.genes.size(); ++g) {
+            double center = c.genes[g] / 10.0; // Normalize to 0-1 range
+            double distance = std::abs(simulatedInput - center);
+            
+            double membership = std::exp(-distance * distance / 0.1);
+            
+            fuzzyOutput += membership * c.genes[g];
+            totalWeight += membership;
+        }
+        
+        if (totalWeight > 0.0) {
+            fuzzyOutput /= totalWeight;
+        }
+        
+        double expectedOutput = 7.0;
+        double error = fuzzyOutput - expectedOutput;
+        totalError += error * error;
+    }
+    
+    double mse = totalError / numTestCases;
+    
+    return 100.0 / (1.0 + mse);
 }
 
 #else
@@ -63,5 +96,4 @@ double Fitness::evaluate(const Chromosome& chromo)
 }
 
 #endif
-
 }
