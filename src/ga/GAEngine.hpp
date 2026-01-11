@@ -2,19 +2,22 @@
 #include "ga_config.hpp"
 
 #include <cstddef>
+#include <memory>
 #include "Chromosome.hpp"
 #include "Population.hpp"
+#include "Fitness.hpp"
 
 namespace ga {
 
 class GAEngine {
 public:
-    GAEngine(size_t populationSize,
-             size_t generations,
-             double crossoverProb,
-             double mutationProb,
-             size_t tournamentSize);
+    GAEngine(size_t populationSize = 100,
+             size_t generations = 100,
+             double crossoverProb = 0.8,
+             double mutationProb = 0.2,
+             size_t tournamentSize = 3);
 
+    void setFitnessEvaluator(Fitness* fitness);
     void run();
 
     const Chromosome& bestChromosome() const { return best_; }
@@ -27,7 +30,8 @@ private:
     double mutationProb_;
     size_t tournamentSize_;
 
-    Population population_;
+    Fitness* fitness_;
+    std::unique_ptr<Population> population_;
     Chromosome best_;
     double bestFitness_;
 

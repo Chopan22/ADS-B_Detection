@@ -5,6 +5,7 @@
 #include <limits>
 #include <iostream>
 #include <random>
+#include <stdexcept>
 
 namespace ga {
 
@@ -18,71 +19,66 @@ GAEngine::GAEngine(size_t populationSize,
       crossoverProb_(crossoverProb),
       mutationProb_(mutationProb),
       tournamentSize_(tournamentSize),
-      population_(populationSize),
+      fitness_(nullptr),
+      population_(nullptr),
       bestFitness_(-std::numeric_limits<double>::infinity())
 {
 }
 
+void GAEngine::setFitnessEvaluator(Fitness* fitness) {
+    fitness_ = fitness;
+    if (fitness_) {
+        population_ = std::make_unique<Population>(
+            populationSize_, *fitness_, crossoverProb_, mutationProb_, tournamentSize_
+        );
+    }
+}
+
 void GAEngine::evaluatePopulation() {
-    for (auto& c : population_.getChromosomes()) {
-        c.fitness = fitnessFunction(c.genes);
-        if (c.fitness > bestFitness_) {
-            bestFitness_ = c.fitness;
-            best_ = c;
+    if (!population_) {
+        throw std::runtime_error("Population not initialized. Call setFitnessEvaluator first.");
+    }
+    
+    const auto& chromosomes = population_->getChromosomes();
+    
+    for (size_t i = 0; i < chromosomes.size(); ++i) {
+        double fitness = fitness_->evaluate(chromosomes[i]);
+        if (fitness > bestFitness_) {
+            bestFitness_ = fitness;
+            best_ = chromosomes[i];
         }
     }
 }
 
 void GAEngine::run() {
-    std::mt19937 gen(std::random_device{}());
-    std::uniform_real_distribution<> dist(0.0, 1.0);
+    if (!fitness_ || !population_) {
+        throw std::runtime_error("Fitness evaluator not set. Call setFitnessEvaluator first.");
+    }
 
-    for (size_t g = 0; g < generations_; ++g) {
+    std::cout << "Initializing population...\n";
+    population_->initialize();
+    
+    std::cout << "Starting GA evolution...\n";
+    
+    for (size_t generation = 0; generation < generations_; ++generation) {
         evaluatePopulation();
 
-        Population newPop(populationSize_);
+#ifdef GA_TEST_MODE
+        std::cout << "\n=== Generation " << generation << " ===\n";
+        population_->debugPrint();
+#endif
 
-        for (size_t i = 0; i < populationSize_ / 2; ++i) {
-            // Tournament selection
-            Chromosome parent1 = Selection::tournament(population_, tournamentSize_, gen);
-            Chromosome parent2 = Selection::tournament(population_, tournamentSize_, gen);
-            #ifdef GA_TEST_MODE
-            std::cout << "\n=== Generation " << gen << " ===\n";
-            population.debugPrint();
-            #endif
-
-            Chromosome offspring1 = parent1;
-            Chromosome offspring2 = parent2;
-
-            // Crossover
-            if (dist(gen) < crossoverProb_) {
-                Chromosome::crossover(parent1, parent2, offspring1, offspring2);
-            } 
-            #ifdef GA_TEST_MODE
-            std::cout << "\n=== Generation " << gen << " ===\n";
-            population.debugPrint();
-            #endif
-
-            // Mutation
-            if (dist(gen) < mutationProb_) offspring1.mutate(gen);
-            if (dist(gen) < mutationProb_) offspring2.mutate(gen);
-            #ifdef GA_TEST_MODE
-            std::cout << "\n=== Generation " << gen << " ===\n";
-            population.debugPrint();
-            #endif
-
-
-
-            newPop.addChromosome(offspring1);
-            newPop.addChromosome(offspring2);
+        if (generation < generations_ - 1) {
+            population_->evolve();
         }
 
-        population_ = std::move(newPop);
-
-        if (g % 10 == 0 || g == generations_ - 1) {
-            std::cout << "Generation " << g
-                      << " Best Fitness: " << bestFitness_ << "\n";
+        if (generation % 10 == 0 || generation == generations_ - 1) {
+            std::cout << "Generation " << generation
+                      << " | Best Fitness: " << bestFitness_ << "\n";
         }
     }
+    
+    std::cout << "\nGA Complete!\n";
+    std::cout << "Final Best Fitness: " << bestFitness_ << "\n";
 }
 }

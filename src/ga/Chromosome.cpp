@@ -2,13 +2,8 @@
 
 #include <stdexcept>
 #include <algorithm>
-
+#include <random>
 #include <cassert>
-assert(!genes.empty());
-assert(bounds[i].min <= genes[i]);
-assert(genes[i] <= bounds[i].max);
-
-
 
 constexpr size_t SPEEDCHANGE_GENES = 13;
 constexpr size_t HEADING_GENES     = 13;
@@ -17,9 +12,9 @@ constexpr size_t ALTITUDE_GENES    = 13;
 constexpr size_t TIMEGAP_GENES     = 7;
 constexpr size_t ANOMALY_GENES     = 7;
 
-constexpr size_t TOTAL_GENES = SPEEDCHANGE_GENES + HEADING_GENES +
-                               VERRATE_GENES + ALTITUDE_GENES +
-                               TIMEGAP_GENES + ANOMALY_GENES;
+constexpr size_t TOTAL_GENES_FULL = SPEEDCHANGE_GENES + HEADING_GENES +
+                                    VERRATE_GENES + ALTITUDE_GENES +
+                                    TIMEGAP_GENES + ANOMALY_GENES;
 
 constexpr VariableScope VARIABLE_SCOPES[] = {
     {-10.0, 10.0},     // SpeedChange
@@ -29,6 +24,7 @@ constexpr VariableScope VARIABLE_SCOPES[] = {
     {0.0, 60.0},       // TimeGap
     {0.0, 1.0}         // AnomalyLevel
 };
+
 #ifdef GA_TEST_MODE
 const std::vector<double> Chromosome::DEFAULT_GENES = {
     1.0, 2.0, 3.0, 4.0, 5.0, 6.0
@@ -70,9 +66,15 @@ const std::vector<double> Chromosome::DEFAULT_GENES = {
 #endif
 
 namespace ga {
+
 Chromosome::Chromosome() {
-    if (DEFAULT_GENES.size() != TOTAL_GENES)
+#ifdef GA_TEST_MODE
+    if (DEFAULT_GENES.size() != 6)
+        throw std::runtime_error("DEFAULT_GENES size does not match expected test size");
+#else
+    if (DEFAULT_GENES.size() != TOTAL_GENES_FULL)
         throw std::runtime_error("DEFAULT_GENES size does not match TOTAL_GENES");
+#endif
 
     genes = DEFAULT_GENES;
     bounds.resize(genes.size());
@@ -108,6 +110,7 @@ void Chromosome::updateBounds() {
             case 3: var_size = ALTITUDE_GENES;   break;
             case 4: var_size = TIMEGAP_GENES;    break;
             case 5: var_size = ANOMALY_GENES;    break;
+            default: var_size = 1; break;
         }
 
         double var_min = VARIABLE_SCOPES[var_idx].min;
@@ -137,10 +140,33 @@ void Chromosome::updateBounds() {
 }
 
 void Chromosome::repair() {
+    assert(!genes.empty());
+    
     for (size_t i = 0; i < genes.size(); ++i) {
+        assert(i < bounds.size());
+        
         if (genes[i] < bounds[i].min) genes[i] = bounds[i].min;
         if (genes[i] > bounds[i].max) genes[i] = bounds[i].max;
+        
+        assert(bounds[i].min <= genes[i]);
+        assert(genes[i] <= bounds[i].max);
     }
+}
+
+void Chromosome::mutate(double mutationRate) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> prob(0.0, 1.0);
+
+    for (size_t i = 0; i < genes.size(); ++i) {
+        if (prob(gen) < mutationRate) {
+            double range = bounds[i].max - bounds[i].min;
+            std::uniform_real_distribution<double> geneDist(bounds[i].min, bounds[i].max);
+            genes[i] = geneDist(gen);
+        }
+    }
+    
+    repair();
 }
 
 std::pair<Chromosome, Chromosome> Chromosome::crossoverTwo(const Chromosome& other, std::mt19937& rng) const {
@@ -174,5 +200,15 @@ std::pair<Chromosome, Chromosome> Chromosome::crossoverTwo(const Chromosome& oth
     child2.repair();
 
     return {child1, child2};
+}
+
+void Chromosome::crossover(const Chromosome& parent1, const Chromosome& parent2, 
+                          Chromosome& offspring1, Chromosome& offspring2) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    
+    auto children = parent1.crossoverTwo(parent2, gen);
+    offspring1 = children.first;
+    offspring2 = children.second;
 }
 }

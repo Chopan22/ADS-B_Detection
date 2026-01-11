@@ -2,11 +2,8 @@
 #include <algorithm>
 #include <random>
 #include <stdexcept>
-
+#include <iostream>
 #include <cassert>
-assert(!genes.empty());
-assert(bounds[i].min <= genes[i]);
-assert(genes[i] <= bounds[i].max);
 
 namespace ga {
 
@@ -39,9 +36,9 @@ void Population::initialize() {
 
 void Population::debugPrint() const {
 #ifdef GA_TEST_MODE
-    for (size_t i = 0; i < individuals.size(); ++i) {
-        std::cout << "Ind " << i << " | Fitness: " << fitness[i] << " | ";
-        for (double g : individuals[i].genes)
+    for (size_t i = 0; i < chromosomes_.size(); ++i) {
+        std::cout << "Ind " << i << " | Fitness: " << fitnessValues_[i] << " | ";
+        for (double g : chromosomes_[i].genes)
             std::cout << g << " ";
         std::cout << "\n";
     }
@@ -49,8 +46,13 @@ void Population::debugPrint() const {
 }
 
 void Population::evaluateFitness() {
+    assert(!chromosomes_.empty());
+    assert(chromosomes_.size() == fitnessValues_.size());
+    
     for (size_t i = 0; i < chromosomes_.size(); ++i) {
         fitnessValues_[i] = fitness_.evaluate(chromosomes_[i]);
+        
+        assert(fitnessValues_[i] >= 0.0);
     }
 }
 

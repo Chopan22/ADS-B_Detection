@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <stdexcept>
+#include <random>
 
 struct GeneBounds {
     double min;
@@ -22,12 +23,18 @@ public:
     Chromosome();
 
     void updateBounds();
-    voidstd::pair<Chromosome, Chromosome> crossoverTwo(const Chromosome& other, std::mt19937& rng) const; repair();
+    void repair();
+    void mutate(double mutationRate = 0.1);
+    
+    std::pair<Chromosome, Chromosome> crossoverTwo(const Chromosome& other, std::mt19937& rng) const;
+    
+    static void crossover(const Chromosome& parent1, const Chromosome& parent2, Chromosome& offspring1, Chromosome& offspring2);
 
-    #ifdef GA_TEST_MODE
-    constexpr size_t TOTAL_GENES = 6;
-    #else
-    constexpr size_t TOTAL_GENES = 66;
-    #endif
     static const std::vector<double> DEFAULT_GENES;
 };
+
+#ifdef GA_TEST_MODE
+static constexpr size_t TOTAL_GENES = 6;
+#else
+static constexpr size_t TOTAL_GENES = 66;
+#endif
