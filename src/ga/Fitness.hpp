@@ -1,4 +1,5 @@
 #pragma once
+#include "ga_config.hpp"
 
 #include <vector>
 #include <map>

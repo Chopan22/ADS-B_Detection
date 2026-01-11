@@ -3,6 +3,11 @@
 #include <random>
 #include <stdexcept>
 
+#include <cassert>
+assert(!genes.empty());
+assert(bounds[i].min <= genes[i]);
+assert(genes[i] <= bounds[i].max);
+
 namespace ga {
 
 Population::Population(size_t populationSize,
@@ -30,6 +35,17 @@ void Population::initialize() {
     }
 
     evaluateFitness();
+}
+
+void Population::debugPrint() const {
+#ifdef GA_TEST_MODE
+    for (size_t i = 0; i < individuals.size(); ++i) {
+        std::cout << "Ind " << i << " | Fitness: " << fitness[i] << " | ";
+        for (double g : individuals[i].genes)
+            std::cout << g << " ";
+        std::cout << "\n";
+    }
+#endif
 }
 
 void Population::evaluateFitness() {

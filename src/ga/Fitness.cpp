@@ -13,6 +13,16 @@ Fitness::Fitness(const std::vector<std::map<std::string, double>>& inputs,
     if (inputs.size() != expectedOutputs.size())
         throw std::runtime_error("Inputs and expected outputs size mismatch");
 }
+#ifdef GA_TEST_MODE
+
+double Fitness::evaluate(const Chromosome& c) {
+    double sum = 0.0;
+    for (double g : c.genes)
+        sum += g;
+    return sum;
+}
+
+#else
 
 double Fitness::evaluate(const Chromosome& chromo)
 {
@@ -51,4 +61,7 @@ double Fitness::evaluate(const Chromosome& chromo)
 
     return 1.0 / (1.0 + mse);
 }
+
+#endif
+
 }

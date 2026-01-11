@@ -46,6 +46,10 @@ void GAEngine::run() {
             // Tournament selection
             Chromosome parent1 = Selection::tournament(population_, tournamentSize_, gen);
             Chromosome parent2 = Selection::tournament(population_, tournamentSize_, gen);
+            #ifdef GA_TEST_MODE
+            std::cout << "\n=== Generation " << gen << " ===\n";
+            population.debugPrint();
+            #endif
 
             Chromosome offspring1 = parent1;
             Chromosome offspring2 = parent2;
@@ -53,11 +57,21 @@ void GAEngine::run() {
             // Crossover
             if (dist(gen) < crossoverProb_) {
                 Chromosome::crossover(parent1, parent2, offspring1, offspring2);
-            }
+            } 
+            #ifdef GA_TEST_MODE
+            std::cout << "\n=== Generation " << gen << " ===\n";
+            population.debugPrint();
+            #endif
 
             // Mutation
             if (dist(gen) < mutationProb_) offspring1.mutate(gen);
             if (dist(gen) < mutationProb_) offspring2.mutate(gen);
+            #ifdef GA_TEST_MODE
+            std::cout << "\n=== Generation " << gen << " ===\n";
+            population.debugPrint();
+            #endif
+
+
 
             newPop.addChromosome(offspring1);
             newPop.addChromosome(offspring2);

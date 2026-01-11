@@ -3,6 +3,13 @@
 #include <stdexcept>
 #include <algorithm>
 
+#include <cassert>
+assert(!genes.empty());
+assert(bounds[i].min <= genes[i]);
+assert(genes[i] <= bounds[i].max);
+
+
+
 constexpr size_t SPEEDCHANGE_GENES = 13;
 constexpr size_t HEADING_GENES     = 13;
 constexpr size_t VERRATE_GENES     = 13;
@@ -22,7 +29,11 @@ constexpr VariableScope VARIABLE_SCOPES[] = {
     {0.0, 60.0},       // TimeGap
     {0.0, 1.0}         // AnomalyLevel
 };
-
+#ifdef GA_TEST_MODE
+const std::vector<double> Chromosome::DEFAULT_GENES = {
+    1.0, 2.0, 3.0, 4.0, 5.0, 6.0
+};
+#else
 const std::vector<double> Chromosome::DEFAULT_GENES = {
     -6.0, -3.0,           //SpeedChange Negative_Large
     -6.0, -3.0, 0.0,      //SpeedChange Negative
@@ -56,6 +67,7 @@ const std::vector<double> Chromosome::DEFAULT_GENES = {
     0.2, 0.5, 0.8,        //AnomalyLevel Medium
     0.6, 0.8              //AnomalyLevel High
 };
+#endif
 
 namespace ga {
 Chromosome::Chromosome() {

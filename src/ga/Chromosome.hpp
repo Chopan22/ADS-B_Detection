@@ -1,4 +1,5 @@
 #pragma once
+#include "ga_config.hpp"
 
 #include <vector>
 #include <stdexcept>
@@ -23,6 +24,10 @@ public:
     void updateBounds();
     voidstd::pair<Chromosome, Chromosome> crossoverTwo(const Chromosome& other, std::mt19937& rng) const; repair();
 
-    static constexpr size_t TOTAL_GENES = 66;
+    #ifdef GA_TEST_MODE
+    constexpr size_t TOTAL_GENES = 6;
+    #else
+    constexpr size_t TOTAL_GENES = 66;
+    #endif
     static const std::vector<double> DEFAULT_GENES;
 };

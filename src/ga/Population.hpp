@@ -1,4 +1,5 @@
 #pragma once
+#include "ga_config.hpp"
 
 #include <vector>
 #include <memory>
@@ -17,6 +18,7 @@ public:
 
     void initialize();
     void evolve();
+    void debugPrint() const;
 
     Chromosome getBest() const;
     const std::vector<Chromosome>& getChromosomes() const { return chromosomes_; }
