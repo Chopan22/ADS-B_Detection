@@ -107,7 +107,7 @@ void Chromosome::updateBounds() {
         }
         else if (offset == 1) {
             bounds[i].min = genes[i-1];
-            bounds[i].max = (i+2 < genes.size()) ? genes[i+2] : var_max;
+            bounds[i].max = genes[i+2];
         }
         else if (offset == var_size-1) {
             bounds[i].min = genes[i-1];
