@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include "Chromosome.hpp"
 #include "../fuzzy/FuzzyInferenceSystem.hpp"
 
@@ -16,7 +17,5 @@ public:
 private:
     std::vector<std::map<std::string, double>> testInputs_;
     std::vector<double> expectedOutputs_;
-
-    fuzzy::FuzzyInferenceSystem baseFIS_;
 };
 }
