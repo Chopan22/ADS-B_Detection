@@ -42,12 +42,20 @@ add_executable(ga_test
 
 target_include_directories(ga_test PRIVATE src)
 
-## Optional: Add install targets
-#install(TARGETS adsb_main fuzzy_test ga_test
-#    RUNTIME DESTINATION bin
-#)
+add_executable(fuzzy_ga_test
+    test/fuzzy_ga_integration_test.cpp
+    ${GA_SOURCES}
+)
 
-## Optional: Enable testing
-#enable_testing()
-#add_test(NAME FuzzySystemTest COMMAND fuzzy_test)
-#add_test(NAME GATest COMMAND ga_test)
+target_include_directories(fuzzy_ga_test PRIVATE src)
+
+# Optional: Add install targets
+install(TARGETS adsb_main fuzzy_test ga_test
+    RUNTIME DESTINATION bin
+)
+
+# Optional: Enable testing
+enable_testing()
+add_test(NAME FuzzySystemTest COMMAND fuzzy_test)
+add_test(NAME GATest COMMAND ga_test)
+add_test(NAME FuzzyGAIntegration COMMAND fuzzy_ga_test)
