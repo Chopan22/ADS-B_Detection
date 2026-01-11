@@ -1,8 +1,8 @@
-#include "ga/GAEngine.hpp"
-#include "ga/Fitness.hpp"
-#include "fuzzy/FuzzyInferenceSystem.hpp"
-#include "fuzzy/AdsbFuzzyVariable.hpp"
-#include "fuzzy/RuleBase.hpp"
+#include "../src/ga/GAEngine.hpp"
+#include "../src/ga/Fitness.hpp"
+#include "../src/fuzzy/FuzzyInferenceSystem.hpp"
+#include "../src/fuzzy/AdsbFuzzyVariable.hpp"
+#include "../src/fuzzy/RuleBase.hpp"
 
 #include <iostream>
 #include <vector>

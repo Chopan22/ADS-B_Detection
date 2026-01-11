@@ -1,5 +1,5 @@
-#include "GAEngine.hpp"
-#include "Fitness.hpp"
+#include "../src/ga/GAEngine.hpp"
+#include "../src/ga/itness.hpp"
 #include <iostream>
 #include <vector>
 #include <map>
