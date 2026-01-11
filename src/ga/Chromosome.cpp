@@ -1,6 +1,27 @@
 #include "Chromosome.hpp"
 
-namespace ga {
+#include <stdexcept>
+#include <algorithm>
+
+constexpr size_t SPEEDCHANGE_GENES = 13;
+constexpr size_t HEADING_GENES     = 13;
+constexpr size_t VERRATE_GENES     = 13;
+constexpr size_t ALTITUDE_GENES    = 13;
+constexpr size_t TIMEGAP_GENES     = 7;
+constexpr size_t ANOMALY_GENES     = 7;
+
+constexpr size_t TOTAL_GENES = SPEEDCHANGE_GENES + HEADING_GENES +
+                               VERRATE_GENES + ALTITUDE_GENES +
+                               TIMEGAP_GENES + ANOMALY_GENES;
+
+constexpr VariableScope VARIABLE_SCOPES[] = {
+    {-10.0, 10.0},     // SpeedChange
+    {-180.0, 180.0},   // HeadingChange
+    {-20.0, 20.0},     // VerticalRateChange
+    {-1000.0, 1000.0}, // AltitudeChange
+    {0.0, 60.0},       // TimeGap
+    {0.0, 1.0}         // AnomalyLevel
+};
 
 const std::vector<double> Chromosome::DEFAULT_GENES = {
     -6.0, -3.0,           //SpeedChange Negative_Large
@@ -36,50 +57,77 @@ const std::vector<double> Chromosome::DEFAULT_GENES = {
     0.6, 0.8              //AnomalyLevel High
 };
 
+namespace ga {
 Chromosome::Chromosome() {
     if (DEFAULT_GENES.size() != TOTAL_GENES)
         throw std::runtime_error("DEFAULT_GENES size does not match TOTAL_GENES");
 
     genes = DEFAULT_GENES;
     bounds.resize(genes.size());
-
-    // Initialize bounds relative to neighboring points
-    for (size_t i = 0; i < genes.size(); ++i) {
-        double left = (i == 0) ? genes[i] - 1.0 : genes[i-1];
-        double right = (i == genes.size()-1) ? genes[i] + 1.0 : genes[i+1];
-
-        bounds[i].min = std::max(genes[i] - 1.0, left);
-        bounds[i].max = std::min(genes[i] + 1.0, right);
-    }
-
+    updateBounds();
     repair();
 }
 
+void Chromosome::updateBounds() {
+    auto getVarIndexAndOffset = [&](size_t i, size_t &offset) -> size_t {
+        size_t start = 0;
+        size_t var_idx = 0;
+        size_t sizes[] = {SPEEDCHANGE_GENES, HEADING_GENES, VERRATE_GENES, ALTITUDE_GENES, TIMEGAP_GENES, ANOMALY_GENES};
+        for (; var_idx < 6; ++var_idx) {
+            if (i < start + sizes[var_idx]) {
+                offset = i - start;
+                return var_idx;
+            }
+            start += sizes[var_idx];
+        }
+        offset = 0;
+        return 5;
+    };
+
+    for (size_t i = 0; i < genes.size(); ++i) {
+        size_t offset;
+        size_t var_idx = getVarIndexAndOffset(i, offset);
+
+        size_t var_size;
+        switch (var_idx) {
+            case 0: var_size = SPEEDCHANGE_GENES; break;
+            case 1: var_size = HEADING_GENES;    break;
+            case 2: var_size = VERRATE_GENES;    break;
+            case 3: var_size = ALTITUDE_GENES;   break;
+            case 4: var_size = TIMEGAP_GENES;    break;
+            case 5: var_size = ANOMALY_GENES;    break;
+        }
+
+        double var_min = VARIABLE_SCOPES[var_idx].min;
+        double var_max = VARIABLE_SCOPES[var_idx].max;
+
+        if (offset == 0) {
+            bounds[i].min = var_min;
+            bounds[i].max = genes[i+1];
+        }
+        else if (offset == 1) {
+            bounds[i].min = genes[i-1];
+            bounds[i].max = (i+2 < genes.size()) ? genes[i+2] : var_max;
+        }
+        else if (offset == var_size-1) {
+            bounds[i].min = genes[i-1];
+            bounds[i].max = var_max;
+        }
+        else if (offset == var_size-2) {
+            bounds[i].min = genes[i-2];
+            bounds[i].max = genes[i+1];
+        }
+        else { 
+            bounds[i].min = genes[i-2];
+            bounds[i].max = genes[i+2];
+        }
+    }
+}
+
 void Chromosome::repair() {
-    // Ensure genes are within bounds
     for (size_t i = 0; i < genes.size(); ++i) {
         if (genes[i] < bounds[i].min) genes[i] = bounds[i].min;
         if (genes[i] > bounds[i].max) genes[i] = bounds[i].max;
     }
-
-    // Ensure ordering within each MF (left < peak < right)
-    // Example: each MF has 3 points
-    for (size_t i = 0; i < genes.size();) {
-        size_t mf_size = 3; // default for triangular
-        if (i + mf_size <= genes.size()) {
-            if (genes[i] > genes[i+1]) genes[i+1] = genes[i]; // left < peak
-            if (genes[i+1] > genes[i+2]) genes[i+2] = genes[i+1]; // peak < right
-        }
-        i += mf_size;
-    }
 }
-
-void Chromosome::print() const {
-    std::cout << "Chromosome: ";
-    for (double g : genes)
-        std::cout << g << " ";
-    std::cout << "\n";
 }
-
-} // namespace ga
-
