@@ -130,4 +130,37 @@ void Chromosome::repair() {
         if (genes[i] > bounds[i].max) genes[i] = bounds[i].max;
     }
 }
+
+std::pair<Chromosome, Chromosome> Chromosome::crossoverTwo(const Chromosome& other, std::mt19937& rng) const {
+    Chromosome child1 = *this;
+    Chromosome child2 = other;
+
+    constexpr size_t varSizes[] = {
+        SPEEDCHANGE_GENES, HEADING_GENES, VERRATE_GENES,
+        ALTITUDE_GENES, TIMEGAP_GENES, ANOMALY_GENES
+    };
+    constexpr size_t NUM_VARS = 6;
+
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+
+    size_t startIdx = 0;
+    for (size_t v = 0; v < NUM_VARS; ++v) {
+        size_t varSize = varSizes[v];
+
+        if (dist(rng) < 0.5) {
+            for (size_t i = 0; i < varSize; ++i) {
+                std::swap(child1.genes[startIdx + i], child2.genes[startIdx + i]);
+            }
+        }
+
+        startIdx += varSize;
+    }
+
+    child1.updateBounds();
+    child2.updateBounds();
+    child1.repair();
+    child2.repair();
+
+    return {child1, child2};
+}
 }

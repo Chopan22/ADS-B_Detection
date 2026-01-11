@@ -21,7 +21,7 @@ public:
     Chromosome();
 
     void updateBounds();
-    void repair();
+    voidstd::pair<Chromosome, Chromosome> crossoverTwo(const Chromosome& other, std::mt19937& rng) const; repair();
 
     static constexpr size_t TOTAL_GENES = 66;
     static const std::vector<double> DEFAULT_GENES;
