@@ -183,36 +183,36 @@ int main() {
     bool testPassed = true;
     
     if (ga.bestFitness() > defaultFitness) {
-        std::cout << "✓ GA improved over default parameters\n";
+        std::cout << "GA improved over default parameters\n";
     } else {
-        std::cout << "✗ GA did not improve over default\n";
+        std::cout << "GA did not improve over default\n";
         testPassed = false;
     }
     
     if (improvement > 5.0) {
-        std::cout << "✓ Significant improvement achieved (> 5%)\n";
+        std::cout << "Significant improvement achieved (> 5%)\n";
     } else if (improvement > 0.0) {
-        std::cout << "~ Marginal improvement (" << improvement << "%)\n";
+        std::cout << "Marginal improvement (" << improvement << "%)\n";
     } else {
-        std::cout << "✗ No improvement\n";
+        std::cout << "No improvement\n";
         testPassed = false;
     }
     
     if (ga.bestFitness() > 0.7) {
-        std::cout << "✓ Good absolute fitness (> 0.7)\n";
+        std::cout << "Good absolute fitness (> 0.7)\n";
     } else if (ga.bestFitness() > 0.5) {
         std::cout << "~ Moderate fitness (" << ga.bestFitness() << ")\n";
     } else {
-        std::cout << "✗ Poor absolute fitness\n";
+        std::cout << "Poor absolute fitness\n";
         testPassed = false;
     }
     
     std::cout << "\n";
     if (testPassed) {
-        std::cout << "✓✓✓ INTEGRATION TEST PASSED ✓✓✓\n";
+        std::cout << "INTEGRATION TEST PASSED\n";
         return 0;
     } else {
-        std::cout << "✗✗✗ INTEGRATION TEST FAILED ✗✗✗\n";
+        std::cout << "INTEGRATION TEST FAILED\n";
         std::cout << "\nTroubleshooting:\n";
         std::cout << "- Check that default parameters are reasonable\n";
         std::cout << "- Try increasing generations or population size\n";

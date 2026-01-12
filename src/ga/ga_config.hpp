@@ -1,3 +1,3 @@
 #pragma once
 
-#define GA_TEST_MODE
+#undef GA_TEST_MODE

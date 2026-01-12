@@ -1,5 +1,6 @@
 #include "Chromosome.hpp"
 
+#include <iostream>
 #include <stdexcept>
 #include <algorithm>
 #include <random>
@@ -59,7 +60,7 @@ const std::vector<double> Chromosome::DEFAULT_GENES = {
 
     1.0, 5.0,             //TimeGap Small
     3.0, 10.0, 20.0,      //TimeGap Medium
-    15.0, 30.0, 60.0,     //TimeGap Large
+    15.0, 30.0,           //TimeGap Large
 
     0.2, 0.4,             //AnomalyLevel Low
     0.2, 0.5, 0.8,        //AnomalyLevel Medium
@@ -122,26 +123,35 @@ void Chromosome::updateBounds() {
         double var_min = VARIABLE_SCOPES[var_idx].min;
         double var_max = VARIABLE_SCOPES[var_idx].max;
 
-        if (offset == 0) {
-            bounds[i].min = var_min;
-            bounds[i].max = genes[i+1];
+        if(var_idx >= 0 && var_idx <= 3){
+          switch(offset){
+            case 0: bounds[i].min = var_min; bounds[i].max = genes[i+2]; break;
+            case 1: bounds[i].min = genes[i+1]; bounds[i].max = genes[i+2]; break;
+            case 2: bounds[i].min = genes[i-2]; bounds[i].max = genes[i-1]; break;
+            case 3: bounds[i].min = genes[i-2]; bounds[i].max = genes[i+2]; break;
+            case 4: bounds[i].min = genes[i+1]; bounds[i].max = genes[i+2]; break;
+            case 5: bounds[i].min = genes[i-2]; bounds[i].max = genes[i-1]; break;
+            case 6: bounds[i].min = genes[i-2]; bounds[i].max = genes[i+2]; break;
+            case 7: bounds[i].min = genes[i+1]; bounds[i].max = genes[i+2]; break;
+            case 8: bounds[i].min = genes[i-2]; bounds[i].max = genes[i-1]; break;
+            case 9: bounds[i].min = genes[i-2]; bounds[i].max = genes[i+2]; break;
+            case 10: bounds[i].min = genes[i+1]; bounds[i].max = genes[i+2]; break;
+            case 11: bounds[i].min = genes[i-2]; bounds[i].max = genes[i-1]; break;
+            case 12: bounds[i].min = genes[i-2]; bounds[i].max = var_max; break;
+          }
+        }else{
+          switch(offset){
+            case 0: bounds[i].min = var_min; bounds[i].max = genes[i+2]; break;
+            case 1: bounds[i].min = genes[i+1]; bounds[i].max = genes[i+2]; break;
+            case 2: bounds[i].min = genes[i-2]; bounds[i].max = genes[i-1]; break;
+            case 3: bounds[i].min = genes[i-2]; bounds[i].max = genes[i+2]; break;
+            case 4: bounds[i].min = genes[i+1]; bounds[i].max = genes[i+2]; break;
+            case 5: bounds[i].min = genes[i-2]; bounds[i].max = genes[i-1]; break;
+            case 6: bounds[i].min = genes[i-2]; bounds[i].max = var_max; break;
+          }
         }
-        else if (offset == 1) {
-            bounds[i].min = genes[i-1];
-            bounds[i].max = genes[i+2];
-        }
-        else if (offset == var_size-1) {
-            bounds[i].min = genes[i-1];
-            bounds[i].max = var_max;
-        }
-        else if (offset == var_size-2) {
-            bounds[i].min = genes[i-2];
-            bounds[i].max = genes[i+1];
-        }
-        else { 
-            bounds[i].min = genes[i-2];
-            bounds[i].max = genes[i+2];
-        }
+        assert(bounds[i].min >= var_min);
+        assert(bounds[i].max <= var_max);
     }
 #endif
 }
@@ -172,8 +182,6 @@ void Chromosome::mutate(double mutationRate) {
             genes[i] = geneDist(gen);
         }
     }
-    
-    repair();
 }
 
 std::pair<Chromosome, Chromosome> Chromosome::crossoverTwo(const Chromosome& other, std::mt19937& rng) const {

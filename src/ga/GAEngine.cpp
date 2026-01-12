@@ -78,7 +78,7 @@ void GAEngine::run() {
         }
     }
     
-    std::cout << "\nGA Complete!\n";
+    std::cout << "\nGA Complete\n";
     std::cout << "Final Best Fitness: " << bestFitness_ << "\n";
 }
 }

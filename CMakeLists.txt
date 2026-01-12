@@ -36,14 +36,14 @@ target_include_directories(fuzzy_test PRIVATE src)
 
 # GA test executable
 add_executable(ga_test
-    src/ga/ga_test.cpp
+    test/ga_test.cpp
     ${GA_SOURCES}
 )
 
 target_include_directories(ga_test PRIVATE src)
 
 add_executable(fuzzy_ga_test
-    test/fuzzy_ga_integration_test.cpp
+    test/fuzzy_ga_int_test.cpp
     ${GA_SOURCES}
 )
 
