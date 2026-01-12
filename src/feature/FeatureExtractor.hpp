@@ -37,6 +37,7 @@ public:
             );
             fv.acceleration = fv.d_speed / dt;
 
+            fv.target_score = curr.target_score;
             features.push_back(fv);
         }
 

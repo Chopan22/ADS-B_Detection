@@ -8,5 +8,6 @@ struct FeatureVector {
     double d_altitude;          
     double ground_distance;    
     double acceleration;        
+    double target_score;
 };
 

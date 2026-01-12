@@ -22,5 +22,7 @@ struct AdsbState {
     bool onground;
     bool alert;
     bool spi;
+
+    double target_score;
 };
 
