@@ -1,22 +1,22 @@
 #pragma once
+#include "../fuzzy/FuzzyInferenceSystem.hpp"
+#include "Chromosome.hpp"
 #include "ga_config.hpp"
 
-#include <vector>
 #include <map>
-#include "Chromosome.hpp"
-#include "../fuzzy/FuzzyInferenceSystem.hpp"
+#include <vector>
 
 namespace ga {
 
 class Fitness {
 public:
-    Fitness(const std::vector<std::map<std::string, double>>& inputs,
-            const std::vector<double>& expectedOutputs);
+  Fitness(const std::vector<std::map<std::string, double>>& inputs,
+          const std::vector<double>&                        expectedOutputs);
 
-    double evaluate(const Chromosome& chromo);
+  double evaluate(const Chromosome& chromo);
 
 private:
-    std::vector<std::map<std::string, double>> testInputs_;
-    std::vector<double> expectedOutputs_;
+  std::vector<std::map<std::string, double>> testInputs_;
+  std::vector<double>                        expectedOutputs_;
 };
-}
+} // namespace ga
