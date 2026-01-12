@@ -2,27 +2,26 @@
 #include <string>
 
 struct AdsbState {
-    long long time;
-    long long last_pos_update;
-    long long last_contact;
-    
-    std::string icao24;
-    std::string squawk;
-    std::string callsign;
+  long long time;
+  long long last_pos_update;
+  long long last_contact;
 
-    double lat;
-    double lon;
-    double baro_altitude;
-    double geo_altitude;
+  std::string icao24;
+  std::string squawk;
+  std::string callsign;
 
-    double velocity;
-    double heading;
-    double vert_rate;
+  double lat;
+  double lon;
+  double baro_altitude;
+  double geo_altitude;
 
-    bool onground;
-    bool alert;
-    bool spi;
+  double velocity;
+  double heading;
+  double vert_rate;
 
-    double target_score;
+  bool onground;
+  bool alert;
+  bool spi;
+
+  double target_score;
 };
-

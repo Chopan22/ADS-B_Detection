@@ -1,9 +1,9 @@
 #pragma once
 
-#include "adsb/AdsbState.hpp"
-#include "features/FeatureVector.hpp"
-#include "features/FeatureExtractor.hpp"
-#include "adsb/AdsbCsvParser.hpp"
+#include "../adsb/AdsbState.hpp"
+#include "../features/FeatureVector.hpp"
+#include "../features/FeatureExtractor.hpp"
+#include "../adsb/AdsbCsvParser.hpp"
 
 #include <vector>
 #include <map>
@@ -30,31 +30,19 @@ public:
         double maxVertRateChange = 50.0;    // m/s
         double maxAltitudeChange = 2000.0;  // meters
         
-        // Normalization ranges (should match fuzzy variable ranges)
+        // Ranges
         double speedChangeRange = 10.0;
         double headingChangeRange = 180.0;
         double vertRateChangeRange = 20.0;
         double altitudeChangeRange = 1000.0;
         double timeGapMax = 60.0;
-        
-        // Labeling strategy
-        enum class LabelStrategy {
-            MANUAL,              // Use provided labels
-            THRESHOLD_BASED,     // Auto-label based on thresholds
-            EXPERT_RULES         // Complex rule-based labeling
-        } labelStrategy = LabelStrategy::EXPERT_RULES;
-        
-        // Expert rule thresholds for auto-labeling
-        double lowAnomalyThreshold = 0.3;
-        double highAnomalyThreshold = 0.7;
     };
 
     explicit AdsbDataPreprocessor(const Config& config = Config())
         : config_(config) {}
 
     std::pair<std::vector<std::map<std::string, double>>, std::vector<double>>
-    process(const std::string& csvPath, 
-            const std::vector<double>& manualLabels = {}) {
+    process(const std::string& csvPath) {
         
         std::cout << "Loading ADS-B data from: " << csvPath << "\n";
         auto states = AdsbCsvParser::load(csvPath);
@@ -72,8 +60,8 @@ public:
         auto filtered = filterOutliers(samples);
         std::cout << "Retained " << filtered.size() << " samples after filtering\n";
         
-        std::cout << "Generating labels...\n";
-        auto labeled = labelSamples(filtered, manualLabels);
+        std::cout << "Generating labels using expert rules...\n";
+        auto labeled = applyExpertRules(filtered);
         
         std::vector<std::map<std::string, double>> inputs;
         std::vector<double> outputs;
@@ -103,7 +91,6 @@ private:
             TrainingSample sample;
             sample.originalIndex = i;
             
-            // Normalize features to fuzzy variable ranges
             sample.inputs["SpeedChange"] = normalizeSpeedChange(fv.d_speed);
             sample.inputs["HeadingChange"] = normalizeHeadingChange(fv.d_heading);
             sample.inputs["VerticalRateChange"] = normalizeVerticalRate(fv.d_vert_rate);
@@ -123,7 +110,6 @@ private:
         for (const auto& sample : samples) {
             bool valid = true;
             
-            // Check against thresholds
             if (std::abs(sample.inputs.at("SpeedChange")) > config_.speedChangeRange) {
                 valid = false;
             }
@@ -140,7 +126,6 @@ private:
                 valid = false;
             }
             
-            // Check for NaN values
             for (const auto& [key, value] : sample.inputs) {
                 if (std::isnan(value) || std::isinf(value)) {
                     valid = false;
@@ -152,76 +137,7 @@ private:
                 filtered.push_back(sample);
             }
         }
-        
         return filtered;
-    }
-
-    std::vector<TrainingSample> labelSamples(
-        const std::vector<TrainingSample>& samples,
-        const std::vector<double>& manualLabels) {
-        
-        std::vector<TrainingSample> labeled = samples;
-        
-        switch (config_.labelStrategy) {
-            case Config::LabelStrategy::MANUAL:
-                return applyManualLabels(labeled, manualLabels);
-                
-            case Config::LabelStrategy::THRESHOLD_BASED:
-                return applyThresholdLabels(labeled);
-                
-            case Config::LabelStrategy::EXPERT_RULES:
-                return applyExpertRules(labeled);
-        }
-        
-        return labeled;
-    }
-
-    std::vector<TrainingSample> applyManualLabels(
-        std::vector<TrainingSample> samples,
-        const std::vector<double>& labels) {
-        
-        if (labels.empty()) {
-            throw std::runtime_error("Manual labels requested but none provided");
-        }
-        
-        if (labels.size() != samples.size()) {
-            throw std::runtime_error("Label count mismatch");
-        }
-        
-        for (size_t i = 0; i < samples.size(); ++i) {
-            samples[i].expectedOutput = std::clamp(labels[i], 0.0, 1.0);
-        }
-        
-        return samples;
-    }
-
-    std::vector<TrainingSample> applyThresholdLabels(std::vector<TrainingSample> samples) {
-        for (auto& sample : samples) {
-            double anomalyScore = 0.0;
-            int factors = 0;
-            
-            // Score based on magnitude of changes
-            if (std::abs(sample.inputs.at("SpeedChange")) > 3.0) {
-                anomalyScore += 0.25;
-                factors++;
-            }
-            if (std::abs(sample.inputs.at("HeadingChange")) > 30.0) {
-                anomalyScore += 0.25;
-                factors++;
-            }
-            if (std::abs(sample.inputs.at("VerticalRateChange")) > 5.0) {
-                anomalyScore += 0.25;
-                factors++;
-            }
-            if (std::abs(sample.inputs.at("AltitudeChange")) > 200.0) {
-                anomalyScore += 0.25;
-                factors++;
-            }
-            
-            sample.expectedOutput = std::clamp(anomalyScore, 0.0, 1.0);
-        }
-        
-        return samples;
     }
 
     std::vector<TrainingSample> applyExpertRules(std::vector<TrainingSample> samples) {
@@ -274,7 +190,6 @@ private:
         return samples;
     }
 
-    // Normalization functions
     double normalizeSpeedChange(double raw) {
         return std::clamp(raw, -config_.speedChangeRange, config_.speedChangeRange);
     }
@@ -300,7 +215,6 @@ private:
         std::cout << "\n=== Dataset Statistics ===\n";
         std::cout << "Total samples: " << inputs.size() << "\n\n";
         
-        // Output distribution
         int low = 0, medium = 0, high = 0;
         for (double out : outputs) {
             if (out < 0.4) low++;
@@ -309,14 +223,13 @@ private:
         }
         
         std::cout << "Anomaly distribution:\n";
-        std::cout << "  Low (< 0.4):    " << low << " (" 
+        std::cout << "  Low (< 0.4):      " << low << " (" 
                   << (100.0 * low / outputs.size()) << "%)\n";
         std::cout << "  Medium (0.4-0.7): " << medium << " (" 
                   << (100.0 * medium / outputs.size()) << "%)\n";
-        std::cout << "  High (> 0.7):   " << high << " (" 
+        std::cout << "  High (> 0.7):     " << high << " (" 
                   << (100.0 * high / outputs.size()) << "%)\n";
         
-        // Feature ranges
         std::cout << "\nFeature ranges:\n";
         for (const auto& [key, _] : inputs[0]) {
             double minVal = std::numeric_limits<double>::max();
