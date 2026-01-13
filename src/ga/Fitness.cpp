@@ -84,16 +84,26 @@ double Fitness::evaluate(const Chromosome& chromo) {
   for (const auto& rule : fuzzy::createAdsbRuleBase())
     fis.addRule(rule);
 
-  double mse = 0.0;
+  double weightedMse = 0.0;
+  double totalWeight = 0.0;
+
   for (size_t i = 0; i < testInputs_.size(); ++i) {
-    double out = fis.evaluate(testInputs_[i]);
-    double err = out - expectedOutputs_[i];
-    mse += err * err;
+      double out = fis.evaluate(testInputs_[i]);
+      double target = expectedOutputs_[i];
+      double err = out - target;
+
+      double weight = 1.0; 
+      if (target >= 0.8) weight = 10.0;    
+      else if (target >= 0.4) weight = 5.0;
+      else if (target > 0.0) weight = 2.0;
+
+      weightedMse += weight * (err * err);
+      totalWeight += weight;
   }
-  mse /= testInputs_.size();
 
-  return 1.0 / (1.0 + mse);
+  weightedMse /= totalWeight;
+
+  return 1.0 / (1.0 + weightedMse);
 }
-
 #endif
 } // namespace ga

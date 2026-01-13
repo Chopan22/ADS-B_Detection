@@ -8,14 +8,14 @@ import sys
 sns.set_style("whitegrid")
 plt.rcParams['figure.figsize'] = (12, 8)
 
-def load_predictions(filepath='results/predictions.csv'):
+def load_predictions(filepath='../build/results/predictions.csv'):
     """Load prediction results"""
     try:
         df = pd.read_csv(filepath)
-        print(f"✓ Loaded {len(df)} predictions from {filepath}")
+        print(f" Loaded {len(df)} predictions from {filepath}")
         return df
     except FileNotFoundError:
-        print(f"✗ Error: {filepath} not found")
+        print(f" Error: {filepath} not found")
         print("  Make sure you've run the optimizer first")
         sys.exit(1)
 
@@ -79,7 +79,7 @@ def plot_error_distribution(df, output_dir='results/graphs'):
     plt.tight_layout()
     filepath = Path(output_dir) / 'error_analysis.png'
     plt.savefig(filepath, dpi=300, bbox_inches='tight')
-    print(f"✓ Saved: {filepath}")
+    print(f" Saved: {filepath}")
     plt.close()
 
 def plot_residuals(df, output_dir='results/graphs'):
@@ -103,7 +103,7 @@ def plot_residuals(df, output_dir='results/graphs'):
     plt.tight_layout()
     filepath = Path(output_dir) / 'residuals.png'
     plt.savefig(filepath, dpi=300, bbox_inches='tight')
-    print(f"✓ Saved: {filepath}")
+    print(f" Saved: {filepath}")
     plt.close()
 
 def plot_feature_importance(df, output_dir='results/graphs'):
@@ -133,7 +133,7 @@ def plot_feature_importance(df, output_dir='results/graphs'):
     plt.tight_layout()
     filepath = Path(output_dir) / 'feature_importance.png'
     plt.savefig(filepath, dpi=300, bbox_inches='tight')
-    print(f"✓ Saved: {filepath}")
+    print(f" Saved: {filepath}")
     plt.close()
 
 def plot_anomaly_classification(df, output_dir='results/graphs'):
@@ -188,7 +188,7 @@ def plot_anomaly_classification(df, output_dir='results/graphs'):
     plt.tight_layout()
     filepath = Path(output_dir) / 'classification_performance.png'
     plt.savefig(filepath, dpi=300, bbox_inches='tight')
-    print(f"✓ Saved: {filepath}")
+    print(f" Saved: {filepath}")
     plt.close()
 
 def plot_feature_distributions(df, output_dir='results/graphs'):
@@ -212,7 +212,7 @@ def plot_feature_distributions(df, output_dir='results/graphs'):
     plt.tight_layout()
     filepath = Path(output_dir) / 'feature_distributions.png'
     plt.savefig(filepath, dpi=300, bbox_inches='tight')
-    print(f"✓ Saved: {filepath}")
+    print(f" Saved: {filepath}")
     plt.close()
 
 def generate_summary_report(df, output_dir='results'):
@@ -276,7 +276,7 @@ def generate_summary_report(df, output_dir='results'):
     with open(filepath, 'w') as f:
         f.write('\n'.join(report))
     
-    print(f"✓ Saved: {filepath}")
+    print(f" Saved: {filepath}")
     
     # Also print to console
     print("\n" + '\n'.join(report))
@@ -327,7 +327,7 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        print(f"\n✗ Error: {e}")
+        print(f"\n Error: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

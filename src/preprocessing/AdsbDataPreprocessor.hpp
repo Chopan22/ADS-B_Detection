@@ -2,8 +2,8 @@
 
 #include "../adsb/AdsbCsvParser.hpp"
 #include "../adsb/AdsbState.hpp"
-#include "../features/FeatureExtractor.hpp"
-#include "../features/FeatureVector.hpp"
+#include "../feature/FeatureExtractor.hpp"
+#include "../feature/FeatureVector.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -23,19 +23,27 @@ struct TrainingSample {
 class AdsbDataPreprocessor {
 public:
   struct Config {
-    // Filtering thresholds
-    double maxTimeGap = 60.0;          // seconds
-    double maxSpeedChange = 50.0;      // m/s
-    double maxHeadingChange = 180.0;   // degrees
-    double maxVertRateChange = 50.0;   // m/s
-    double maxAltitudeChange = 2000.0; // meters
+    // Filtering thresholds (initialized with default values)
+    double maxTimeGap;          // seconds
+    double maxSpeedChange;      // m/s
+    double maxHeadingChange;    // degrees
+    double maxVertRateChange;   // m/s
+    double maxAltitudeChange;   // meters
 
     // Ranges
-    double speedChangeRange = 10.0;
-    double headingChangeRange = 180.0;
-    double vertRateChangeRange = 20.0;
-    double altitudeChangeRange = 1000.0;
-    double timeGapMax = 60.0;
+    double speedChangeRange;
+    double headingChangeRange;
+    double vertRateChangeRange;
+    double altitudeChangeRange;
+    double timeGapMax;
+
+    // Constructor to initialize default values
+    Config()
+      : maxTimeGap(60.0), maxSpeedChange(50.0), maxHeadingChange(180.0),
+        maxVertRateChange(50.0), maxAltitudeChange(2000.0),
+        speedChangeRange(10.0), headingChangeRange(180.0),
+        vertRateChangeRange(20.0), altitudeChangeRange(1000.0),
+        timeGapMax(60.0) {}
   };
 
   explicit AdsbDataPreprocessor(const Config& config = Config()) : config_(config) {}
@@ -149,35 +157,45 @@ private:
 
       double anomalyLevel = 0.0;
 
-      // Rule 1: Normal cruise behavior (low anomaly)
-      if (std::abs(speed) < 1.0 && std::abs(heading) < 5.0 && std::abs(vertRate) < 1.0 &&
-          timeGap < 5.0) {
-        anomalyLevel = 0.1;
+      // 1. Rule: Extreme Physics / Boundary Violation (Score 0.9 - 1.0)
+      // Close to or exceeding the defined maximum capability of the sensor/model.
+      if (std::abs(speed) > 8.0 || std::abs(vertRate) > 15.0 || std::abs(altitude) > 800.0) {
+          anomalyLevel = 1.0; 
       }
-      // Rule 2: Coordinated maneuver (low-medium anomaly)
-      else if (std::abs(speed) < 2.0 && std::abs(heading) < 20.0 && std::abs(vertRate) < 3.0) {
-        anomalyLevel = 0.3;
+
+      // 2. Rule: Impossible Rotation (Score 0.9)
+      // Turning > 90 degrees in a single update is physically impossible for a jet.
+      else if (std::abs(heading) > 90.0) {
+          anomalyLevel = 0.9;
       }
-      // Rule 3: Aggressive maneuver (medium-high anomaly)
-      else if (std::abs(speed) > 4.0 || std::abs(heading) > 45.0 || std::abs(vertRate) > 7.0) {
-        anomalyLevel = 0.7;
+
+      // 3. Rule: Compound Aggressive Maneuver (Score 0.7 - 0.8)
+      // Significant speed and heading changes happening simultaneously.
+      else if (std::abs(speed) > 5.0 && std::abs(heading) > 45.0) {
+          anomalyLevel = 0.8;
       }
-      // Rule 4: Extreme changes (high anomaly)
-      else if (std::abs(speed) > 7.0 || std::abs(heading) > 90.0 || std::abs(vertRate) > 12.0 ||
-               std::abs(altitude) > 500.0) {
-        anomalyLevel = 0.9;
+
+      // 4. Rule: Performance Edge / Rapid Transition (Score 0.5)
+      // Halfway to the limit. Unlikely for commercial flight but possible.
+      else if (std::abs(speed) > 4.0 || std::abs(vertRate) > 8.0 || std::abs(heading) > 30.0) {
+          anomalyLevel = 0.5;
       }
-      // Rule 5: Combined anomalies with small time gap (high anomaly)
-      else if ((std::abs(speed) > 3.0 && std::abs(heading) > 30.0) && timeGap < 3.0) {
-        anomalyLevel = 0.8;
+
+      // 5. Rule: Normal Operations / Coordinated Turns (Score 0.2)
+      // Small deviations within expected flight envelopes.
+      else if (std::abs(speed) > 1.0 || std::abs(heading) > 10.0 || std::abs(vertRate) > 2.0) {
+          anomalyLevel = 0.2;
       }
-      // Rule 6: Large time gap reduces anomaly significance
-      else if (timeGap > 15.0) {
-        anomalyLevel = 0.2;
+
+      // 6. Rule: Uncertainty due to Time Gap
+      // High deltas are expected if we haven't heard from the plane in 30+ seconds.
+      else if (timeGap > 30.0) {
+          anomalyLevel = 0.1; 
       }
-      // Default: moderate anomaly
+
+      // Default: Smooth, Stable Flight
       else {
-        anomalyLevel = 0.5;
+          anomalyLevel = 0.0;
       }
 
       sample.expectedOutput = std::clamp(anomalyLevel, 0.0, 1.0);

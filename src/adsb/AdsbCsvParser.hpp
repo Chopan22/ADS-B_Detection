@@ -71,9 +71,10 @@ private:
     getDouble(s.geo_altitude);
     getLong(s.last_pos_update);
     getLong(s.last_contact);
-    getDouble(s.target_score)
+    getDouble(s.target_score);
 
-        if (s.icao24.empty()) return false;
+    if (s.icao24.empty()) 
+      return false;
     if (s.onground)
       return false;
     if (std::isnan(s.lat) || std::isnan(s.lon))

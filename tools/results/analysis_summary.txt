@@ -1,0 +1,25 @@
+============================================================
+OPTIMIZATION RESULTS SUMMARY
+============================================================
+
+Total Samples: 1800
+
+Error Statistics:
+  Mean Error:       0.0691
+  Std Error:        0.1460
+  Mean Abs Error:   0.1237
+  Max Abs Error:    1.0000
+  Min Abs Error:    0.0500
+
+  MSE:              0.0261
+  RMSE:             0.1615
+
+  R² Score:         0.2004
+
+Classification Performance (threshold=0.5):
+  Accuracy:         0.9889
+  Precision:        1.0000
+  Recall:           0.6000
+  F1 Score:         0.7500
+
+============================================================
