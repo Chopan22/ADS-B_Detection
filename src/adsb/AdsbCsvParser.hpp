@@ -73,7 +73,7 @@ private:
     getLong(s.last_contact);
     getDouble(s.target_score);
 
-    if (s.icao24.empty()) 
+    if (s.icao24.empty())
       return false;
     if (s.onground)
       return false;

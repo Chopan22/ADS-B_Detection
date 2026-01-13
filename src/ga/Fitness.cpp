@@ -88,17 +88,20 @@ double Fitness::evaluate(const Chromosome& chromo) {
   double totalWeight = 0.0;
 
   for (size_t i = 0; i < testInputs_.size(); ++i) {
-      double out = fis.evaluate(testInputs_[i]);
-      double target = expectedOutputs_[i];
-      double err = out - target;
+    double out = fis.evaluate(testInputs_[i]);
+    double target = expectedOutputs_[i];
+    double err = out - target;
 
-      double weight = 1.0; 
-      if (target >= 0.8) weight = 10.0;    
-      else if (target >= 0.4) weight = 5.0;
-      else if (target > 0.0) weight = 2.0;
+    double weight = 1.0;
+    if (target >= 0.8)
+      weight = 10.0;
+    else if (target >= 0.4)
+      weight = 5.0;
+    else if (target > 0.0)
+      weight = 2.0;
 
-      weightedMse += weight * (err * err);
-      totalWeight += weight;
+    weightedMse += weight * (err * err);
+    totalWeight += weight;
   }
 
   weightedMse /= totalWeight;

@@ -24,11 +24,11 @@ class AdsbDataPreprocessor {
 public:
   struct Config {
     // Filtering thresholds (initialized with default values)
-    double maxTimeGap;          // seconds
-    double maxSpeedChange;      // m/s
-    double maxHeadingChange;    // degrees
-    double maxVertRateChange;   // m/s
-    double maxAltitudeChange;   // meters
+    double maxTimeGap;        // seconds
+    double maxSpeedChange;    // m/s
+    double maxHeadingChange;  // degrees
+    double maxVertRateChange; // m/s
+    double maxAltitudeChange; // meters
 
     // Ranges
     double speedChangeRange;
@@ -39,11 +39,9 @@ public:
 
     // Constructor to initialize default values
     Config()
-      : maxTimeGap(60.0), maxSpeedChange(50.0), maxHeadingChange(180.0),
-        maxVertRateChange(50.0), maxAltitudeChange(2000.0),
-        speedChangeRange(10.0), headingChangeRange(180.0),
-        vertRateChangeRange(20.0), altitudeChangeRange(1000.0),
-        timeGapMax(60.0) {}
+        : maxTimeGap(60.0), maxSpeedChange(50.0), maxHeadingChange(180.0), maxVertRateChange(50.0),
+          maxAltitudeChange(2000.0), speedChangeRange(10.0), headingChangeRange(180.0),
+          vertRateChangeRange(20.0), altitudeChangeRange(1000.0), timeGapMax(60.0) {}
   };
 
   explicit AdsbDataPreprocessor(const Config& config = Config()) : config_(config) {}
@@ -160,42 +158,42 @@ private:
       // 1. Rule: Extreme Physics / Boundary Violation (Score 0.9 - 1.0)
       // Close to or exceeding the defined maximum capability of the sensor/model.
       if (std::abs(speed) > 8.0 || std::abs(vertRate) > 15.0 || std::abs(altitude) > 800.0) {
-          anomalyLevel = 1.0; 
+        anomalyLevel = 1.0;
       }
 
       // 2. Rule: Impossible Rotation (Score 0.9)
       // Turning > 90 degrees in a single update is physically impossible for a jet.
       else if (std::abs(heading) > 90.0) {
-          anomalyLevel = 0.9;
+        anomalyLevel = 0.9;
       }
 
       // 3. Rule: Compound Aggressive Maneuver (Score 0.7 - 0.8)
       // Significant speed and heading changes happening simultaneously.
       else if (std::abs(speed) > 5.0 && std::abs(heading) > 45.0) {
-          anomalyLevel = 0.8;
+        anomalyLevel = 0.8;
       }
 
       // 4. Rule: Performance Edge / Rapid Transition (Score 0.5)
       // Halfway to the limit. Unlikely for commercial flight but possible.
       else if (std::abs(speed) > 4.0 || std::abs(vertRate) > 8.0 || std::abs(heading) > 30.0) {
-          anomalyLevel = 0.5;
+        anomalyLevel = 0.5;
       }
 
       // 5. Rule: Normal Operations / Coordinated Turns (Score 0.2)
       // Small deviations within expected flight envelopes.
       else if (std::abs(speed) > 1.0 || std::abs(heading) > 10.0 || std::abs(vertRate) > 2.0) {
-          anomalyLevel = 0.2;
+        anomalyLevel = 0.2;
       }
 
       // 6. Rule: Uncertainty due to Time Gap
       // High deltas are expected if we haven't heard from the plane in 30+ seconds.
       else if (timeGap > 30.0) {
-          anomalyLevel = 0.1; 
+        anomalyLevel = 0.1;
       }
 
       // Default: Smooth, Stable Flight
       else {
-          anomalyLevel = 0.0;
+        anomalyLevel = 0.0;
       }
 
       sample.expectedOutput = std::clamp(anomalyLevel, 0.0, 1.0);
