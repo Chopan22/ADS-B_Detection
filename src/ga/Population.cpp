@@ -70,39 +70,49 @@ Chromosome Population::tournamentSelect() {
 }
 
 void Population::evolve() {
-  std::vector<Chromosome> newPopulation;
-  newPopulation.reserve(populationSize_);
+    std::vector<Chromosome> offspringPopulation;
+    offspringPopulation.reserve(populationSize_);
 
-  static std::random_device              rd;
-  static std::mt19937                    gen(rd());
-  std::uniform_real_distribution<double> probDist(0.0, 1.0);
+    while (offspringPopulation.size() < populationSize_) {
+        Chromosome parent1 = tournamentSelect();
+        Chromosome parent2 = tournamentSelect();
 
-  while (newPopulation.size() < populationSize_) {
-    // Selection
-    Chromosome parent1 = tournamentSelect();
-    Chromosome parent2 = tournamentSelect();
+        Chromosome offspring1 = parent1;
+        Chromosome offspring2 = parent2;
 
-    Chromosome offspring1 = parent1;
-    Chromosome offspring2 = parent2;
+        // Crossover
+        if (probDist(gen) < crossoverProb_) {
+            Chromosome::crossover(parent1, parent2, offspring1, offspring2);
+        }
 
-    // Crossover
-    if (probDist(gen) < crossoverProb_) {
-      Chromosome::crossover(parent1, parent2, offspring1, offspring2);
+        // Mutation
+        if (probDist(gen) < mutationProb_)
+            offspring1.mutate();
+        if (probDist(gen) < mutationProb_)
+            offspring2.mutate();
+
+        offspringPopulation.push_back(offspring1);
+        if (offspringPopulation.size() < populationSize_)
+            offspringPopulation.push_back(offspring2);
     }
 
-    // Mutation
-    if (probDist(gen) < mutationProb_)
-      offspring1.mutate();
-    if (probDist(gen) < mutationProb_)
-      offspring2.mutate();
+    std::vector<Chromosome> combinedPopulation;
+    combinedPopulation.reserve(2 * populationSize_);
 
-    newPopulation.push_back(offspring1);
-    if (newPopulation.size() < populationSize_)
-      newPopulation.push_back(offspring2);
-  }
+    combinedPopulation.insert(combinedPopulation.end(),
+                              chromosomes_.begin(), chromosomes_.end());
+    combinedPopulation.insert(combinedPopulation.end(),
+                              offspringPopulation.begin(), offspringPopulation.end());
 
-  chromosomes_ = std::move(newPopulation);
-  evaluateFitness();
+    chromosomes_ = std::move(combinedPopulation);
+    evaluateFitness();
+
+    std::sort(chromosomes_.begin(), chromosomes_.end(),
+              [](const Chromosome& a, const Chromosome& b) {
+                  return a.getFitness() > b.getFitness();
+              });
+
+    chromosomes_.resize(populationSize_);
 }
 
 Chromosome Population::getBest() const {
