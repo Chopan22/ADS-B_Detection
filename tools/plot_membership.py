@@ -225,15 +225,15 @@ def plot_comparison(genes, output_dir='results/graphs'):
     """Plot comparison between default and optimized MFs for one variable"""
     
     # Default parameters for SpeedChange
-    default_params = [-6.0, -3.0, -6.0, -3.0, 0.0, -1.0, 0.0, 1.0, 0.0, 3.0, 6.0, 3.0, 6.0]
-    optimized_params = genes[0:13]
+    default_params = [-500,-100,-500,-100,0,-50,0,50,0,100,500,100,500]
+    optimized_params = genes[39:52]
     
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
     
     # Plot default
     plot_variable_mfs(
         ax1,
-        x_range=(-10, 10),
+        x_range=(-1000, 1000),
         params=default_params,
         labels=['Negative Large', 'Negative', 'Zero', 'Positive', 'Positive Large'],
         title='Speed Change - Default Parameters',
@@ -243,7 +243,7 @@ def plot_comparison(genes, output_dir='results/graphs'):
     # Plot optimized
     plot_variable_mfs(
         ax2,
-        x_range=(-10, 10),
+        x_range=(-1000, 1000),
         params=optimized_params,
         labels=['Negative Large', 'Negative', 'Zero', 'Positive', 'Positive Large'],
         title='Speed Change - Optimized Parameters',

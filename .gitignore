@@ -44,4 +44,9 @@ data/*
 !data/
 !data/README.md
 
-build/
+build/*
+
+tools/*
+!tools/
+!tools/analyze_results.py
+!tools/plot_membership.py

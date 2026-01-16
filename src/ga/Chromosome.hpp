@@ -26,7 +26,7 @@ public:
 
   void updateBounds();
   void repair();
-  void mutate(double mutationRate = 0.1);
+  void mutate(double mutationRate = 0.3);
 
   std::pair<Chromosome, Chromosome> crossoverTwo(const Chromosome& other, std::mt19937& rng) const;
 
