@@ -70,70 +70,65 @@ Chromosome Population::tournamentSelect() {
 }
 
 void Population::evolve() {
-    std::vector<Chromosome> offspringPopulation;
-    offspringPopulation.reserve(populationSize_);
+  std::vector<Chromosome> offspringPopulation;
+  offspringPopulation.reserve(populationSize_);
 
-    static std::random_device              rd;
-    static std::mt19937                    gen(rd());
-    std::uniform_real_distribution<double> probDist(0.0, 1.0);
+  static std::random_device              rd;
+  static std::mt19937                    gen(rd());
+  std::uniform_real_distribution<double> probDist(0.0, 1.0);
 
+  while (offspringPopulation.size() < populationSize_) {
+    Chromosome parent1 = tournamentSelect();
+    Chromosome parent2 = tournamentSelect();
 
+    Chromosome offspring1 = parent1;
+    Chromosome offspring2 = parent2;
 
-    while (offspringPopulation.size() < populationSize_) {
-        Chromosome parent1 = tournamentSelect();
-        Chromosome parent2 = tournamentSelect();
-
-        Chromosome offspring1 = parent1;
-        Chromosome offspring2 = parent2;
-
-        // Crossover
-        if (probDist(gen) < crossoverProb_) {
-            Chromosome::crossover(parent1, parent2, offspring1, offspring2);
-        }
-
-        // Mutation
-        if (probDist(gen) < mutationProb_)
-            offspring1.mutate();
-        if (probDist(gen) < mutationProb_)
-            offspring2.mutate();
-
-        offspringPopulation.push_back(offspring1);
-        if (offspringPopulation.size() < populationSize_)
-            offspringPopulation.push_back(offspring2);
+    // Crossover
+    if (probDist(gen) < crossoverProb_) {
+      Chromosome::crossover(parent1, parent2, offspring1, offspring2);
     }
 
-    std::vector<Chromosome> combinedPopulation;
-    combinedPopulation.reserve(2 * populationSize_);
+    // Mutation
+    if (probDist(gen) < mutationProb_)
+      offspring1.mutate();
+    if (probDist(gen) < mutationProb_)
+      offspring2.mutate();
 
-    combinedPopulation.insert(combinedPopulation.end(),
-                              chromosomes_.begin(), chromosomes_.end());
-    combinedPopulation.insert(combinedPopulation.end(),
-                              offspringPopulation.begin(), offspringPopulation.end());
+    offspringPopulation.push_back(offspring1);
+    if (offspringPopulation.size() < populationSize_)
+      offspringPopulation.push_back(offspring2);
+  }
 
-    chromosomes_ = std::move(combinedPopulation);
-    fitnessValues_.resize(chromosomes_.size());
-    evaluateFitness();
+  std::vector<Chromosome> combinedPopulation;
+  combinedPopulation.reserve(2 * populationSize_);
 
-    std::vector<size_t> indices(chromosomes_.size());
-    std::iota(indices.begin(), indices.end(), 0);
+  combinedPopulation.insert(combinedPopulation.end(), chromosomes_.begin(), chromosomes_.end());
+  combinedPopulation.insert(combinedPopulation.end(), offspringPopulation.begin(),
+                            offspringPopulation.end());
 
-    std::sort(indices.begin(), indices.end(),
-              [this](size_t a, size_t b) {
-                  return fitnessValues_[a] > fitnessValues_[b];
-              });
+  chromosomes_ = std::move(combinedPopulation);
+  fitnessValues_.resize(chromosomes_.size());
+  evaluateFitness();
 
-    std::vector<Chromosome> elitePopulation;
-    std::vector<double> eliteFitness;
-    elitePopulation.reserve(populationSize_);
-    eliteFitness.reserve(populationSize_);
+  std::vector<size_t> indices(chromosomes_.size());
+  std::iota(indices.begin(), indices.end(), 0);
 
-    for (size_t i = 0; i < populationSize_; ++i) {
-        elitePopulation.push_back(chromosomes_[indices[i]]);
-        eliteFitness.push_back(fitnessValues_[indices[i]]);
-    }
+  std::sort(indices.begin(), indices.end(),
+            [this](size_t a, size_t b) { return fitnessValues_[a] > fitnessValues_[b]; });
 
-    chromosomes_ = std::move(elitePopulation);
-    fitnessValues_ = std::move(eliteFitness);
+  std::vector<Chromosome> elitePopulation;
+  std::vector<double>     eliteFitness;
+  elitePopulation.reserve(populationSize_);
+  eliteFitness.reserve(populationSize_);
+
+  for (size_t i = 0; i < populationSize_; ++i) {
+    elitePopulation.push_back(chromosomes_[indices[i]]);
+    eliteFitness.push_back(fitnessValues_[indices[i]]);
+  }
+
+  chromosomes_ = std::move(elitePopulation);
+  fitnessValues_ = std::move(eliteFitness);
 }
 
 Chromosome Population::getBest() const {

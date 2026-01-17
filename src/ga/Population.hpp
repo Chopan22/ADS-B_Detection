@@ -11,7 +11,7 @@ namespace ga {
 class Population {
 public:
   Population(size_t populationSize, Fitness& fitnessEvaluator, double crossoverProb = 0.8,
-             double mutationProb = 0.5, size_t tournamentSize = 3);
+             double mutationProb = 0.3, size_t tournamentSize = 3);
 
   void initialize();
   void evolve();
