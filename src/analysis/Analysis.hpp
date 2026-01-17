@@ -67,6 +67,17 @@ public:
     std::cout << "  MAE:        " << m.mae << "\n";
     std::cout << "  RMSE:       " << m.rmse << "\n";
     std::cout << "  R²:         " << m.r_squared << "\n";
+    std::ofstream out("results/analysis.txt");
+    if (!out.is_open()) {
+    std::cerr << "Warning: Could not save parameters to gg " << "\n";
+    return;
+    }
+    out << "Regression Metrics:\n";
+    out << "  MSE:        " << m.mse << "\n";
+    out << "  MAE:        " << m.mae << "\n";
+    out << "  RMSE:       " << m.rmse << "\n";
+    out << "  R²:         " << m.r_squared << "\n";
+    out.close();
 
     std::cout << "\nClassification Metrics:\n";
     std::cout << "  Accuracy:   " << m.accuracy() << "\n";
@@ -97,7 +108,7 @@ public:
 
     saveMetricsSummary(baselineTrain, baselineVal, optTrain, optVal, "results/metrics_summary.txt");
 
-    std::cout << "✓ Detailed results saved to results/ directory\n";
+    std::cout << " Detailed results saved to results/ directory\n";
     std::cout << "  - predictions.csv: Prediction results\n";
     std::cout << "  - error_analysis.txt: Error breakdown\n";
     std::cout << "  - metrics_summary.txt: Performance metrics\n";
