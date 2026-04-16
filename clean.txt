@@ -1,0 +1,16 @@
+What does each module mean, not just do?
+What is being optimized?
+
+better fuzzy partitioning
+improved fitness function
+better feature extraction
+
+Not all at once.
+
+Looking for:
+
+clearer interpretation of variables
+fewer hidden assumptions
+better controlled behavior under changes
+ability to explain system end-to-end in simple terms
+
