@@ -1,4 +1,8 @@
-# ADS-B Anomaly Detection using Fuzzy Logic and Genetic Algorithms
+# ADS-B Anomaly Detection using Fuzzy Logic and Genetic Algorithms 
+----
+
+## Ended more as a kinetic sanity checker for ADS-B data, archived due to deviation from the first idea.
+
 
 ### Prerequisites
 
